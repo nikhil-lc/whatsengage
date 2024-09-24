@@ -22,7 +22,7 @@ export const sendMessage = async (phone: string, message: string) => {
 };
 
 export const sendTextMessage = async (phone: string, message: string) => {
-    const apiUrl = `https://live-mt-server.wati.io/338552/api/v1/sendSessionMessage/+91${phone}?messageText=${message}`;  // Phone in URL
+    const apiUrl = `https://live-mt-server.wati.io/338552/api/v1/sendSessionMessage/${phone}?messageText=${message}`;  // Phone in URL
     const apiKey = process.env.WATI_API_KEY;  // Get your WATI API Key from .env.local
   
     const options = {
@@ -55,7 +55,7 @@ export const sendTextMessage = async (phone: string, message: string) => {
   };
 
   export const sendInteractiveMessage = async (phone: string) => {
-    const apiUrl = `https://live-mt-server.wati.io/338552/api/v1/sendInteractiveButtonsMessage?whatsappNumber=+91${phone}`;
+    const apiUrl = `https://live-mt-server.wati.io/338552/api/v1/sendInteractiveButtonsMessage?whatsappNumber=${phone}`;
     const apiKey = process.env.WATI_API_KEY;  // Ensure you have set the API key in .env.local
   
     const payload = {
@@ -92,7 +92,7 @@ export const sendTextMessage = async (phone: string, message: string) => {
     }
   };
   export const sendTemplateMessage = async (phone: string, templateName: string, templateParams: string[]) => {
-    const apiUrl = `https://live-mt-server.wati.io/338552/api/v1/sendTemplateMessage?whatsappNumber=+91${phone}`;  // WATI API endpoint for template messages
+    const apiUrl = `https://live-mt-server.wati.io/338552/api/v1/sendTemplateMessage?whatsappNumber=+${phone}`;  // WATI API endpoint for template messages
     const apiKey = process.env.WATI_API_KEY;  // Ensure your WATI API Key is set in .env.local
   
     const payload = {

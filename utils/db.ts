@@ -1,28 +1,32 @@
-import sqlite3 from 'sqlite3';
+import supabase from './supabaseClient';
 
-// Initialize the SQLite database
-const db = new sqlite3.Database('./messages.db');
+// Fetch all users
+export const fetchUsers = async () => {
+  const { data, error } = await supabase.from('users').select('*');
+  if (error) throw new Error(error.message);
+  return data;
+};
 
-// Create users and messages tables if they don't exist
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT,
-      phone TEXT
-    )
-  `);
+// Add a new user
+export const addUser = async (name: string, phone: string) => {
+  const { data, error } = await supabase.from('users').insert([{ name, phone }]);
+  if (error) throw new Error(error.message);
+  return data;
+};
 
-  db.run(`
-    CREATE TABLE IF NOT EXISTS messages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId INTEGER,
-      message TEXT,
-      response TEXT,
-      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (userId) REFERENCES users (id)
-    )
-  `);
-});
+// Fetch messages for a user
+export const fetchMessages = async (userId: number) => {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('userId', userId);
+  if (error) throw new Error(error.message);
+  return data;
+};
 
-export default db;
+// Add a new message
+export const addMessage = async (userId: number, message: string, response: string) => {
+  const { data, error } = await supabase.from('messages').insert([{ userId, message, response }]);
+  if (error) throw new Error(error.message);
+  return data;
+};

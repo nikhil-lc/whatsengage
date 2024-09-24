@@ -1,4 +1,4 @@
-import db from '@/utils/db';
+import supabase from '@/utils/supabaseClient';  // Supabase client
 import { sendMessage } from '@/utils/wati';
 import { NextResponse } from 'next/server';
 import cron from 'node-cron';
@@ -15,26 +15,40 @@ type Message = {
 };
 
 // Schedule the weekly summary cron job for every Sunday at 10 AM
-cron.schedule('0 10 * * SUN', () => {
-  db.all('SELECT * FROM users', (err, users: User[]) => { // Type the users array correctly
-    if (err) throw err;
+cron.schedule('0 10 * * SUN', async () => {
+  try {
+    // Fetch all users from Supabase
+    const { data: users, error: usersError } = await supabase.from('users').select('*');
+    if (usersError) {
+      console.error('Error fetching users:', usersError.message);
+      throw usersError;
+    }
 
-    users.forEach((user: User) => {
-      db.all(
-        'SELECT * FROM messages WHERE userId = ? AND timestamp >= datetime("now", "-7 days")',
-        [user.id],
-        (err, rows: Message[]) => { // Type the rows array correctly
-          if (err) throw err;
+    // Iterate over each user
+    for (const user of users as User[]) {
+      // Fetch messages from the last 7 days for each user
+      const { data: messages, error: messagesError } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('userId', user.id)
+        .gte('timestamp', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
-          let summary = rows
-            .map((row) => `Message: ${row.message}, Response: ${row.response || 'No Response'}`)
-            .join('\n');
+      if (messagesError) {
+        console.error(`Error fetching messages for user ${user.id}:`, messagesError.message);
+        throw messagesError;
+      }
 
-          sendMessage(user.phone, `Your weekly summary:\n${summary}`);
-        }
-      );
-    });
-  });
+      // Create a summary from the messages
+      const summary = (messages as Message[])
+        .map((msg) => `Message: ${msg.message}, Response: ${msg.response || 'No Response'}`)
+        .join('\n');
+
+      // Send the summary to the user's phone
+      await sendMessage(user.phone, `Your weekly summary:\n${summary}`);
+    }
+  } catch (error) {
+    console.error('Error in weekly summary cron job:', error);
+  }
 });
 
 export async function GET() {
