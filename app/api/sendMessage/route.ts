@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   const { userId, templateName, templateParams, message } = await req.json();
 
 
-  return new Promise((resolve, reject) => {
+  return new Promise<void | Response>((resolve, reject) =>{
     db.get('SELECT * FROM users WHERE id = ?', [userId], async (err, user:User) => {
       if (err) {
         reject(NextResponse.json({ error: 'User not found' }, { status: 404 }));

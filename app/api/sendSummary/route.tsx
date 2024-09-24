@@ -5,7 +5,7 @@ import db from '@/utils/db';
 export async function POST(req: Request) {
   const { userId } = await req.json();
 
-  return new Promise((resolve, reject) => {
+  return new Promise<void | Response>((resolve, reject) =>{
     db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user:any) => {
       if (err) {
         reject(NextResponse.json({ error: 'User not found' }, { status: 404 }));

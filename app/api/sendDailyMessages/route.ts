@@ -5,9 +5,9 @@ import cron from 'node-cron';
 
 // Send daily messages at 9 AM
 cron.schedule('0 9 * * *', () => {
-  db.all('SELECT * FROM users', (err, users: any[]) => {
+  db.all('SELECT * FROM users', (err, users) => {
     if (err) throw err;
-    users.forEach((user) => {
+    users.forEach((user: { id: number; name: string; phone: string }) => {
       const message = `Hello ${user.name}, here’s your daily message.`;
       sendMessage(user.phone, message);
       db.run('INSERT INTO messages (userId, message) VALUES (?, ?)', [user.id, message]);
