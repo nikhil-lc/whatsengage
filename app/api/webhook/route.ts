@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   try {
     // Parse the incoming webhook request from WATI
     const body = await req.json();
-
+    console.log("Webhook received:", body);
     // Extract important details from the webhook payload
     const { whatsappNumber, message, reply, timestamp } = body;
 
